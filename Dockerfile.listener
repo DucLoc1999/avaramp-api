@@ -1,0 +1,40 @@
+# --- STAGE 1: Base Environment & Dependencies ---
+FROM node:24-alpine AS base
+RUN apk update
+RUN apk add --no-cache libc6-compat
+WORKDIR /app
+
+# Copy package definitions first to lock the cache layer
+COPY package.json package-lock.json ./
+
+# Install dependencies including tsx for TypeScript runtime
+RUN npm ci
+
+# --- STAGE 2: Production Runtime for the C-Chain Listener ---
+FROM node:24-alpine AS production
+RUN apk update
+RUN apk add --no-cache su-exec
+WORKDIR /app
+
+# Copy package files and node_modules from base stage
+COPY --from=base /app/package*.json ./
+COPY --from=base /app/node_modules ./node_modules
+
+# Copy listener source code (TypeScript files)
+COPY cchain-listener ./cchain-listener
+
+# Copy shared source (cchain services + config)
+COPY src ./src
+
+# Copy entrypoint script
+COPY docker-entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Create logs directory with proper permissions
+RUN mkdir -p /app/logs && \
+    chown -R node:node /app/logs && \
+    chmod -R 755 /app/logs
+
+# Run as non-root user
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+CMD ["npx", "tsx", "cchain-listener/src/index.ts"]

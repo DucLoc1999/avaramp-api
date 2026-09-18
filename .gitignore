@@ -1,0 +1,63 @@
+# env
+.env
+.env.*
+!.env.example
+.env.prod
+
+# secrets / credentials (never commit)
+*.pem
+*.key
+*.p12
+gcp-creds.json
+credentials.json
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# misc build/test
+coverage/
+*.tsbuildinfo
+*.log
+npm-debug.log*
+*.sqlite
+
+# build output
+dist/
+
+# dependencies
+node_modules/
+
+# logs
+logs/
+
+
+# agent
+.claude/
+skills-lock.json
+.agent/
+.agents/
+.opencode
+graphify*
+openspec
+.codex/
+
+# Exceptions: allow CI/CD and deployment docs/scripts
+!docs/CICD_SETUP.md
+!scripts/setup-cicd-vars.sh
+
+# General ignore
+docs/
+scripts/
+data/
+
+# Worker secrets
+*.dev.vars
+
+# Tests (not tracked)
+test/
+
+# scratch
+p2p_prices.db
